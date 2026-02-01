@@ -1,19 +1,20 @@
-
 const mysql = require("mysql2");
 require("dotenv").config();
 
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 10
-});
+if (!process.env.DATABASE_URL) {
+  console.error("❌ DATABASE_URL is not set");
+  process.exit(1);
+}
 
+const db = mysql.createPool(process.env.DATABASE_URL);
+
+// test connection
 db.query("SELECT DATABASE() AS db", (err, rows) => {
-  if (!err) console.log("✅ Connected to DB:", rows[0].db);
+  if (err) {
+    console.error("❌ DB connection failed:", err.message);
+  } else {
+    console.log("✅ Connected to DB:", rows[0].db);
+  }
 });
 
 module.exports = db;
